@@ -1,0 +1,29 @@
+{
+  "name": "mydronemap",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Local browser map for drone flying legality across Australian councils, NSW state and CASA regulations. Start with Willoughby and Sydney metro.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.jsx",
+    "validate:rules": "node scripts/validate-rules.mjs"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.12",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "vite": "^5.4.11"
+  }
+}

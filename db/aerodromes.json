@@ -1,0 +1,15 @@
+{
+  "source": "OurAirports",
+  "attribution": "David Megginson (via OurAirports open dataset)",
+  "license": "CC0 1.0",
+  "fetched": "2026-08-09",
+  "row_count": 2676,
+  "field_notes": {
+    "type": "large_airport | medium_airport | small_airport | heliport",
+    "icao_code": "CASA-assigned ICAO designator (4-letter); empty for unregistered",
+    "gps_code": "GPS / local identifier",
+    "latitude_deg": "WGS84 decimal degrees",
+    "longitude_deg": "WGS84 decimal degrees"
+  },
+  "notes": "Filtered to Australia (iso_country=AU). Controlled airports already in rules.json (YSSY/YSBK/YSCN/YSRI) removed to avoid duplicate buffers. Apply CASA Part 101 buffer rules: small_airport 4km, heliport 1.4km."
+}
