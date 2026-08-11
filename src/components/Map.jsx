@@ -15,6 +15,10 @@ const esc = (s) => String(s).replace(/[<>&"']/g, (c) =>
   ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c]),
 );
 
+// Responsive popup width: cap so popups stay readable / within viewport on mobile.
+const popupMax = (max) =>
+  typeof window !== 'undefined' ? Math.min(max, window.innerWidth - 40) : max;
+
 export default function MapView({
   enrichedFeatures,
   rules,
@@ -29,6 +33,7 @@ export default function MapView({
   const airportLayerRef = useRef(null);
   const protectedLayerRef = useRef(null);
   const aerodromeLayerRef = useRef(null);
+  const locateMarkerRef = useRef(null);
 
   // Initialise map once
   useEffect(() => {
@@ -37,13 +42,99 @@ export default function MapView({
       center: DEFAULT_MAP_CENTER,
       zoom: 11,
       preferCanvas: true,
+      zoomControl: false,
     });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap',
       maxZoom: 19,
     }).addTo(map);
+    // Zoom moved off top-left so it doesn't overlap the mobile menu FAB.
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
     mapInstance.current = map;
+
+    // Keep Leaflet sized correctly when the container resizes
+    // (sidebar drawer toggle, orientation change, mobile browser chrome).
+    const ro = new ResizeObserver(() => {
+      if (mapInstance.current) mapInstance.current.invalidateSize();
+    });
+    ro.observe(mapRef.current);
+
+    // Geolocation: fly to the device position with an accuracy circle.
+    const locate = () => {
+      if (!navigator.geolocation) {
+        alert('Geolocation is not supported by this browser.');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+          const latlng = L.latLng(latitude, longitude);
+          if (locateMarkerRef.current) {
+            map.removeLayer(locateMarkerRef.current);
+          }
+          const accCircle = L.circle(latlng, {
+            radius: Math.max(accuracy, 5),
+            color: '#4ea1ff',
+            weight: 1,
+            fillColor: '#4ea1ff',
+            fillOpacity: 0.12,
+          });
+          const marker = L.marker(latlng, {
+            icon: L.divIcon({
+              className: 'locate-div-icon',
+              html: '<div class="locate-marker"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#4ea1ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L19 21 L12 17 L5 21 Z" /></svg></div>',
+              iconSize: [22, 22],
+              iconAnchor: [11, 11],
+            }),
+          });
+          const group = L.layerGroup([accCircle, marker]).addTo(map);
+          locateMarkerRef.current = group;
+          marker.bindPopup(
+            `<div class="popup-title">You are here</div>` +
+            `<div class="popup-summary">Accuracy: ±${Math.round(accuracy)} m</div>`,
+            { maxWidth: popupMax(260) },
+          ).openPopup();
+          const bounds = accCircle.getBounds();
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+          } else {
+            map.setView(latlng, 16);
+          }
+        },
+        (err) => {
+          const msgs = {
+            1: 'Location permission denied.',
+            2: 'Position unavailable.',
+            3: 'Location request timed out.',
+          };
+          alert(msgs[err.code] || 'Could not get your location.');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
+      );
+    };
+
+    const LocateControl = L.Control.extend({
+      options: { position: 'bottomright' },
+      onAdd() {
+        const container = L.DomUtil.create('div', 'leaflet-locate-control');
+        const btn = L.DomUtil.create('a', 'locate-btn', container);
+        btn.href = '#';
+        btn.title = 'Show my location';
+        btn.setAttribute('role', 'button');
+        btn.setAttribute('aria-label', 'Show my location');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L19 21 L12 17 L5 21 Z" /></svg>';
+        L.DomEvent.on(btn, 'click', (e) => {
+          L.DomEvent.preventDefault(e);
+          locate();
+        });
+        return container;
+      },
+    });
+    map.addControl(new LocateControl());
+
     return () => {
+      ro.disconnect();
+      locateMarkerRef.current = null;
       map.remove();
       mapInstance.current = null;
     };
@@ -75,7 +166,7 @@ export default function MapView({
           if (_council) {
             leafletLayer.bindPopup(
               () => CouncilPopup({ council: _council, councilKey: _councilKey, lgaName: LGA_NAME, rules }),
-              { maxWidth: 360 },
+              { maxWidth: popupMax(360) },
             );
           } else {
             const esc = (s) => String(s).replace(/[<>&"']/g, (c) =>
@@ -85,6 +176,7 @@ export default function MapView({
               `<div class="popup-title">${esc(LGA_NAME)}</div>
                <div class="status-badge unknown">UNKNOWN</div>
                <div class="popup-summary">No rule data on file. Follow CASA baseline only.</div>`,
+              { maxWidth: popupMax(320) },
             );
           }
         },
@@ -152,7 +244,7 @@ export default function MapView({
           ${gazArea ? `<div class="popup-summary"><strong>Gazetted area:</strong> ${Number(gazArea).toLocaleString()} ha</div>` : ''}
           <div class="popup-warning">Drone use prohibited without NPWS or managing authority permission.</div>
         `;
-        leafletLayer.bindPopup(html, { maxWidth: 320 });
+        leafletLayer.bindPopup(html, { maxWidth: popupMax(320) });
       },
     });
     layer.addTo(mapInstance.current);
@@ -195,7 +287,7 @@ export default function MapView({
         </div>
         <div class="popup-warning">${radiusKm}km CASA Part 101 exclusion zone</div>
       `;
-      circle.bindPopup(html, { maxWidth: 280 });
+      circle.bindPopup(html, { maxWidth: popupMax(280) });
       circle.bindTooltip(
         `<strong>${esc(a.name || a.ident)}</strong> (${esc(a.type)})`,
       );

@@ -42,6 +42,8 @@ export default function App() {
     search: '',
   });
   const [selectedCouncil, setSelectedCouncil] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [warningExpanded, setWarningExpanded] = useState(false);
 
   // Load rules + polygons from /db
   useEffect(() => {
@@ -108,12 +110,14 @@ export default function App() {
 
   const handleCouncilClick = useCallback((councilKey) => {
     setSelectedCouncil(councilKey);
+    // Close the drawer so the map popup is visible on mobile.
+    setSidebarOpen(false);
   }, []);
 
   if (!rules || !lgaGeoJson) {
     return (
       <div className="app">
-        <header className="warning-bar" role="alert">
+        <header className={`warning-bar ${warningExpanded ? 'is-expanded' : 'is-collapsed'}`} role="alert">
           <div className="warning-bar-icon" aria-hidden="true">⚠️</div>
           <div className="warning-bar-content">
             <strong>Unofficial reference only.</strong>{' '}
@@ -125,6 +129,14 @@ export default function App() {
             <strong>the authors take no responsibility for any decisions made
             based on its content</strong>.
           </div>
+          <button
+            type="button"
+            className="warning-toggle"
+            aria-expanded={warningExpanded}
+            onClick={() => setWarningExpanded((v) => !v)}
+          >
+            {warningExpanded ? 'Show less' : 'Show more'}
+          </button>
         </header>
         <div className="app-body">
           <div className="sidebar">
@@ -141,7 +153,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="warning-bar" role="alert">
+      <header className={`warning-bar ${warningExpanded ? 'is-expanded' : 'is-collapsed'}`} role="alert">
         <div className="warning-bar-icon" aria-hidden="true">⚠️</div>
         <div className="warning-bar-content">
           <strong>Unofficial reference only.</strong>{' '}
@@ -153,10 +165,25 @@ export default function App() {
           <strong>the authors take no responsibility for any decisions made
           based on its content</strong>.
         </div>
+        <button
+          type="button"
+          className="warning-toggle"
+          aria-expanded={warningExpanded}
+          onClick={() => setWarningExpanded((v) => !v)}
+        >
+          {warningExpanded ? 'Show less' : 'Show more'}
+        </button>
       </header>
       <div className="app-body">
-      <aside className="sidebar">
+      {sidebarOpen && <div className="backdrop" onClick={() => setSidebarOpen(false)} />}
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
+          <button
+            type="button"
+            className="sidebar-close"
+            aria-label="Close menu"
+            onClick={() => setSidebarOpen(false)}
+          >✕</button>
           <h1>🛩 MyDroneMap</h1>
           <div className="subtitle">
             Where can I fly around Sydney? · data v{rules.metadata.version} (updated {rules.metadata.last_updated})
@@ -185,6 +212,14 @@ export default function App() {
         </div>
       </aside>
       <main className="map-area">
+        {!sidebarOpen && (
+          <button
+            type="button"
+            className="fab fab-menu"
+            aria-label="Open menu"
+            onClick={() => setSidebarOpen(true)}
+          >☰</button>
+        )}
         <MapView
           enrichedFeatures={enrichedFeatures}
           rules={rules}
