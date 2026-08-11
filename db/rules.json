@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "metadata": {
-    "version": "1.2.6",
+    "version": "1.2.7",
     "last_updated": "2026-08-09",
     "scope": "Greater Sydney Metro, NSW, Australia",
     "scope_purpose": "RECREATIONAL drone flights only \u2014 flying for fun, sport, hobby or as a private individual. Camera-equipped drones (DJI Avata 2, Mini 4 Pro, etc.) flown for personal enjoyment are RECREATIONAL, not commercial, as long as the output is not sold, licensed, broadcast, contracted, or used to support a business. This map does NOT cover: commercial operations (CASA RePL/ReOC required), business/freelance filming, contracted inspections/surveys, research, or government use. Where a council rule was sourced from a filming/photography page, the rule is applied to recreational flyers only if the source explicitly covers non-commercial use \u2014 otherwise the rule is rec-OPEN and the filming URL is dropped.",
@@ -79,22 +79,19 @@
       "display_name": "Ku-ring-gai Council",
       "lga_pid": "lgadf196edd3a41",
       "matches_dataset_name": "Ku-ring-gai Council",
-      "status": "permit",
-      "summary": "Council-managed land (ovals, sportsgrounds, parks, libraries): written council approval required before flying any RPA over council-owned or managed land, per Ku-ring-gai Drone (RPA) Policy. The policy cites CASR Part 101, an 'accredited RPA operator certificate or remote pilot licence', and public liability insurance \u2014 these are commercial credentials, so the rec carve-out is currently unclear and an email has been sent seeking confirmation (2026-08-09). Separate rule: large portions of the LGA fall within Ku-ring-gai Chase National Park (NPWS Drone Exclusion Zone) where rec drone use is prohibited entirely.",
+      "status": "open",
+      "summary": "Council-managed land (ovals, sportsgrounds, parks, libraries): CASA Part 101 rules apply to recreational flyers. Council confirmed in writing (2026-08-09) that the Drone (RPA) Policy v2 is internal \u2014 it governs Council officers and contractors only, NOT members of the public. Rec flyers expected to follow CASA. Separate rule: large portions of the LGA fall within Ku-ring-gai Chase National Park (NPWS Drone Exclusion Zone) where rec drone use is prohibited entirely.",
       "permitted_areas": [
-        "Council-managed land with prior written approval from council"
+        "Council-managed land (CASA Part 101 rules apply)"
       ],
       "prohibited_areas": [
-        "NPWS-managed land within the LGA (Ku-ring-gai Chase National Park) \u2014 rec use prohibited entirely",
-        "Council no-fly zones: swimming pools, school zones, bushcare areas (per RPA policy)"
+        "Ku-ring-gai Chase National Park \u2014 rec drone use prohibited entirely (NPWS Drone Exclusion Zone)"
       ],
       "notes": [
-        "Ku-ring-gai Drone (RPA) Policy (originally adopted 2019, revised v2 considered Nov 2024) governs drone use on council land.",
-        "Policy text appears to require written approval for ANY RPA over council land, but cites commercial credentials (RePL/ReOC, public liability insurance) \u2014 these don't apply to CASA Part 101 hobbyists, so the rec carve-out needs explicit confirmation.",
-        "Application form: Ku-ring-gai Flying of Remotely Piloted Aircraft application form (contact filming@krg.nsw.gov.au or council@krg.nsw.gov.au).",
+        "Council Drone (RPA) Policy v2 (effective 26 November 2024) is INTERNAL \u2014 governs Council officers and contractors only. Confirmed by council email 2026-08-09.",
+        "Recreational flyers expected to follow CASA rules. No council permit required for rec use on council-managed land.",
         "LARGE portion of LGA covered by Ku-ring-gai Chase National Park (NPWS) \u2014 rec drone use prohibited (Drone Exclusion Zone).",
-        "Always check if your launch/landing point is on NPWS land before flying \u2014 many 'council parks' near the national park border are actually NPWS-managed.",
-        "Email sent to council 2026-08-09 seeking written confirmation of rec carve-out and no-fly zone list."
+        "Always check if your launch/landing point is on NPWS land before flying \u2014 many 'council parks' near the national park border are actually NPWS-managed."
       ],
       "permit_url": "https://www.nationalparks.nsw.gov.au/conservation-and-heritage/care-for-parks/drones-in-parks",
       "permit_label": "NPWS permit (for national park land)",
