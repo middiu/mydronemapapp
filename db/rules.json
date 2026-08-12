@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "metadata": {
-    "version": "1.2.8",
+    "version": "1.2.9",
     "last_updated": "2026-08-09",
     "scope": "Greater Sydney Metro, NSW, Australia",
     "scope_purpose": "RECREATIONAL drone flights only \u2014 flying for fun, sport, hobby or as a private individual. Camera-equipped drones (DJI Avata 2, Mini 4 Pro, etc.) flown for personal enjoyment are RECREATIONAL, not commercial, as long as the output is not sold, licensed, broadcast, contracted, or used to support a business. This map does NOT cover: commercial operations (CASA RePL/ReOC required), business/freelance filming, contracted inspections/surveys, research, or government use. Where a council rule was sourced from a filming/photography page, the rule is applied to recreational flyers only if the source explicitly covers non-commercial use \u2014 otherwise the rule is rec-OPEN and the filming URL is dropped.",
@@ -119,7 +119,7 @@
       "lga_pid": "lgadf196edd3a41",
       "matches_dataset_name": "North Sydney Council",
       "status": "open",
-      "summary": "No dedicated recreational drone policy. The filming/photography drone section (UOC, RPC, public liability, $100\u2013$670 fees) targets commercial operators only \u2014 recreational CASA Part 101 flyers are not in scope. The Commercial & Group Use of Open Space Policy s.4(c) lists drones as 'not permitted' for commercial operators, groups of 21+, and educational institutions at commercial/private events \u2014 not casual recreational flyers. CASA recreational rules apply. Most of LGA is within 5.5km of Sydney Airport \u2014 CASA restrictions. Email sent to council 2026-08-09 seeking written confirmation of rec carve-out.",
+      "summary": "No dedicated recreational drone policy. The filming/photography drone section (UOC, RPC, public liability, $100\u2013$670 fees) targets commercial operators only \u2014 recreational CASA Part 101 flyers are not in scope and do NOT need a Filming Permit Application. Council confirmed in writing (Yona, 2026-08-09) that all applicable CASA requirements must be followed at all times for both rec and commercial use, and that 'it is the operator's responsibility to ensure compliance with all CASA regulations'. The Commercial & Group Use of Open Space Policy s.4(c) lists drones as 'not permitted' for commercial operators, groups of 21+, and educational institutions at commercial/private events \u2014 not casual recreational flyers. Most of LGA is within 5.5km of Sydney Airport \u2014 CASA restrictions.",
       "permitted_areas": [
         "Council land for casual recreational use (CASA rules apply)",
         "Private property with landowner consent"
@@ -131,7 +131,7 @@
         "Most of LGA is within 5.5km of Sydney Airport (controlled) \u2014 CASA approval needed for drones >250g.",
         "Sydney Harbour National Park (Kirribilli/Bradley Head approach areas) is NPWS-managed \u2014 rec drone use prohibited (Drone Exclusion Zone).",
         "Sydney Harbour Federation Trust (SHFT) sites in LGA: Sub Base Platypus (North Sydney), foreshore around Kirribilli \u2014 rec drone use NOT permitted.",
-        "Awaiting written confirmation from council on rec carve-out (email 2026-08-09)."
+        "Council confirmed in writing (Yona, 2026-08-09): rec flyers do NOT need a Filming Permit Application. CASA rules apply."
       ],
       "sources": [
         {
