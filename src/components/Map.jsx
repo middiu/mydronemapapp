@@ -10,6 +10,7 @@ import {
   DEFAULT_MAP_CENTER,
 } from '../lib/styles.js';
 import CouncilPopup from './CouncilPopup.jsx';
+import { save as saveLastPosition } from '../lib/lastPosition.js';
 
 const esc = (s) => String(s).replace(/[<>&"']/g, (c) =>
   ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c]),
@@ -26,6 +27,7 @@ export default function MapView({
   selectedCouncil,
   protectedGeoJson,
   aerodromes,
+  lastPosition,
 }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
@@ -34,13 +36,28 @@ export default function MapView({
   const protectedLayerRef = useRef(null);
   const aerodromeLayerRef = useRef(null);
   const locateMarkerRef = useRef(null);
+  const lastSeenMarkerRef = useRef(null);
 
   // Initialise map once
   useEffect(() => {
     if (mapInstance.current) return;
+
+    // Pick initial view from saved last position (if we have one) so the
+    // app rehydrates a useful offline state on launch.
+    const hasSaved =
+      lastPosition &&
+      Number.isFinite(lastPosition.lat) &&
+      Number.isFinite(lastPosition.lon);
+    const initialCenter = hasSaved
+      ? [lastPosition.lat, lastPosition.lon]
+      : DEFAULT_MAP_CENTER;
+    const initialZoom = hasSaved && Number.isFinite(lastPosition.zoom)
+      ? lastPosition.zoom
+      : 11;
+
     const map = L.map(mapRef.current, {
-      center: DEFAULT_MAP_CENTER,
-      zoom: 11,
+      center: initialCenter,
+      zoom: initialZoom,
       preferCanvas: true,
       zoomControl: false,
     });
@@ -59,6 +76,38 @@ export default function MapView({
     });
     ro.observe(mapRef.current);
 
+    // Drop a faded "last seen here" marker if we have a saved fix but no
+    // live geolocation yet. Replaced by the live marker the moment the
+    // user grants location.
+    if (hasSaved) {
+      const saved = lastPosition;
+      const lastSeen = L.marker([saved.lat, saved.lon], {
+        icon: L.divIcon({
+          className: 'locate-div-icon',
+          html: '<div class="locate-marker last-seen"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#9aa5b1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L19 21 L12 17 L5 21 Z" /></svg></div>',
+          iconSize: [22, 22],
+          iconAnchor: [11, 11],
+        }),
+        opacity: 0.65,
+        interactive: false,
+      });
+      lastSeen.bindTooltip('Last seen here');
+      lastSeen.addTo(map);
+      lastSeenMarkerRef.current = lastSeen;
+    }
+
+    // Persist view on every moveend so the next launch rehydrates it.
+    // Throttling lives inside lastPosition.save() — Map.jsx can fire freely.
+    map.on('moveend zoomend', () => {
+      const c = map.getCenter();
+      saveLastPosition({
+        lat: c.lat,
+        lon: c.lng,
+        center: [c.lat, c.lng],
+        zoom: map.getZoom(),
+      });
+    });
+
     // Geolocation: fly to the device position with an accuracy circle.
     const locate = () => {
       if (!navigator.geolocation) {
@@ -69,6 +118,11 @@ export default function MapView({
         (pos) => {
           const { latitude, longitude, accuracy } = pos.coords;
           const latlng = L.latLng(latitude, longitude);
+          // Once we have a live fix, hide the faded "last seen here" marker.
+          if (lastSeenMarkerRef.current) {
+            map.removeLayer(lastSeenMarkerRef.current);
+            lastSeenMarkerRef.current = null;
+          }
           if (locateMarkerRef.current) {
             map.removeLayer(locateMarkerRef.current);
           }
@@ -100,6 +154,14 @@ export default function MapView({
           } else {
             map.setView(latlng, 16);
           }
+          // Persist the live fix so the next offline launch can rehydrate it.
+          saveLastPosition({
+            lat: latitude,
+            lon: longitude,
+            accuracy,
+            center: [latitude, longitude],
+            zoom: map.getZoom(),
+          });
         },
         (err) => {
           const msgs = {
@@ -135,6 +197,7 @@ export default function MapView({
     return () => {
       ro.disconnect();
       locateMarkerRef.current = null;
+      lastSeenMarkerRef.current = null;
       map.remove();
       mapInstance.current = null;
     };

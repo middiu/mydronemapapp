@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import fs from 'node:fs';
 import path from 'node:path';
+import { writeAssetManifest } from './scripts/write-asset-manifest.mjs';
 
 // Serve files from ./db/* at /db/* during dev and build, so the React app can
 // fetch('/db/rules.json') and fetch('/db/nsw_lga.geojson') directly.
@@ -63,6 +64,9 @@ function serveDb() {
       for (const file of fs.readdirSync(src)) {
         fs.copyFileSync(path.join(src, file), path.join(dest, file));
       }
+      // Write dist/asset-manifest.json so the service worker can precache
+      // every hashed /assets/* entry without hard-coding hashes here.
+      writeAssetManifest(path.join(process.cwd(), 'dist'));
     },
   };
 }

@@ -207,3 +207,77 @@ Cloudflare Pages → **Custom domains** → add your domain. Free SSL auto-provi
 
 Application code: MIT. Data files retain their original licences (see
 `metadata.notes` in `db/rules.json` and the source URLs above).
+
+---
+
+## PWA / offline mode
+
+MyDroneMap is a Progressive Web App. Install it on your phone and the whole
+app — council polygons, protected areas, aerodromes, your last known
+position, and the OSM base map tiles around where you've been — works
+offline. Built for the case where you're standing in a paddock with no
+signal, deciding whether to fly.
+
+### Install on iPhone / iPad
+
+1. Open the deployed site in **Safari** (must be Safari, not Chrome/Firefox).
+2. Tap the **Share** button → **Add to Home Screen**.
+3. Confirm the name. The app launches full-screen, no URL bar.
+
+### Install on Android
+
+1. Open the deployed site in **Chrome**.
+2. Tap the menu (⋮) → **Install app** (or **Add to Home screen**).
+3. Launch from the home screen icon.
+
+### What works offline
+
+- App shell (HTML, JS, CSS) — full UI.
+- All map data (`rules.json`, NSW LGA polygons, protected areas, aerodromes).
+- OpenStreetMap base tiles you have already panned over while online.
+- A faded "last seen here" pin for your last geolocation fix, so the map
+  has a visual anchor even when geolocation is denied while offline.
+
+### What doesn't work offline
+
+- OSM tiles you have never loaded online will show as grey squares (this
+  is the OSM tile-serving policy and also just keeps the cache small).
+- Links to external council / CASA / NPWS pages will not open without a
+  signal — they open in the browser, not the SW.
+
+### How state is persisted
+
+- `lastPosition` is saved to `localStorage` under
+  `mydronemap:lastPosition:v1` on every moveend and on every successful
+  geolocation fix. Throttled to 1 write/second.
+- Service worker (registered at `/sw.js`) precaches the app shell +
+  `/db/*` on install, and caches OSM tiles stale-while-revalidate with an
+  LRU cap of ~1500 tiles.
+
+### Forcing a service worker refresh
+
+After a new deploy, the browser normally picks up the new SW within a
+day (or sooner if the user closes all tabs). To force it immediately:
+
+- Chrome DevTools → Application → Service Workers → **Update** (or
+  **Unregister** then reload).
+- iOS Safari: Settings → Safari → Advanced → Website Data → delete the
+  site entry, then revisit and reinstall from the home screen.
+
+### Build artefacts
+
+```
+dist/
+├── index.html
+├── manifest.webmanifest      # PWA manifest
+├── sw.js                     # service worker
+├── asset-manifest.json       # hashed asset list (read by SW on install)
+├── icon-192.png
+├── icon-512.png
+├── icon-maskable-512.png
+├── _headers                  # cache rules + SW-Allowed header
+├── assets/                   # hashed JS + CSS (immutable, 1y cache)
+└── db/                       # rules.json, schema.json, nsw_lga.geojson,
+                             # protected_areas.geojson, aerodromes.csv
+```
+

@@ -5,6 +5,8 @@ import Filters from './components/Filters.jsx';
 import CasaCard from './components/CasaCard.jsx';
 import CouncilList from './components/CouncilList.jsx';
 import Stats from './components/Stats.jsx';
+import OfflineBanner from './components/OfflineBanner.jsx';
+import { load as loadLastPosition } from './lib/lastPosition.js';
 
 // Parse OurAirports CSV (no quoted fields, simple comma split).
 // Returns: { ident, type, name, lat, lon, municipality, region, icao, gps }
@@ -44,6 +46,8 @@ export default function App() {
   const [selectedCouncil, setSelectedCouncil] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [warningExpanded, setWarningExpanded] = useState(false);
+  // Hydrated once at mount — drives initial map view + "last seen here" marker.
+  const [lastPosition] = useState(() => loadLastPosition());
 
   // Load rules + polygons from /db
   useEffect(() => {
@@ -117,6 +121,7 @@ export default function App() {
   if (!rules || !lgaGeoJson) {
     return (
       <div className="app">
+        <OfflineBanner />
         <header className={`warning-bar ${warningExpanded ? 'is-expanded' : 'is-collapsed'}`} role="alert">
           <div className="warning-bar-icon" aria-hidden="true">⚠️</div>
           <div className="warning-bar-content">
@@ -153,6 +158,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <OfflineBanner />
       <header className={`warning-bar ${warningExpanded ? 'is-expanded' : 'is-collapsed'}`} role="alert">
         <div className="warning-bar-icon" aria-hidden="true">⚠️</div>
         <div className="warning-bar-content">
@@ -227,6 +233,7 @@ export default function App() {
           selectedCouncil={selectedCouncil}
           protectedGeoJson={protectedGeoJson}
           aerodromes={aerodromes}
+          lastPosition={lastPosition}
         />
       </main>
       </div>

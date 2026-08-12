@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f1419"/>
+  <!-- Stylised map pin with drone quadcopter arms -->
+  <g transform="translate(256 256)" fill="none" stroke="#4ea1ff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Outer pin teardrop -->
+    <path d="M0 -150 C 70 -150 110 -100 110 -55 C 110 10 60 70 0 150 C -60 70 -110 10 -110 -55 C -110 -100 -70 -150 0 -150 Z" fill="rgba(78,161,255,0.18)"/>
+    <!-- Inner circle (location dot) -->
+    <circle cx="0" cy="-55" r="22" fill="#4ea1ff" stroke="none"/>
+    <!-- Quadcopter arms -->
+    <line x1="-90" y1="-95" x2="90" y2="-95"/>
+    <line x1="-90" y1="-15" x2="90" y2="-15"/>
+    <!-- Propeller hubs -->
+    <circle cx="-90" cy="-95" r="14" fill="#0f1419"/>
+    <circle cx="90" cy="-95" r="14" fill="#0f1419"/>
+    <circle cx="-90" cy="-15" r="14" fill="#0f1419"/>
+    <circle cx="90" cy="-15" r="14" fill="#0f1419"/>
+  </g>
+</svg>
