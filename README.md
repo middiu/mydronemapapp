@@ -28,6 +28,9 @@ source policy.
 - **Smaller airports + helipads** (OurAirports CC0 dataset) with 4 km /
   1.4 km CASA Part 101 buffers.
 - Layer toggles for each airspace overlay.
+- **5 base map styles** — streets, topographic, satellite imagery, and two
+  alternates — selectable from the sidebar; selection persists across
+  reloads.
 
 ## Data model
 
@@ -181,6 +184,9 @@ Cloudflare Pages → **Custom domains** → add your domain. Free SSL auto-provi
   Water (DCCEEW) — CAPAD 2024, CC-BY 4.0
 - Aerodromes + heliports: OurAirports (David Megginson), CC0 1.0
 - Base map: OpenStreetMap contributors, ODbL
+- Topographic base: OpenTopoMap, CC-BY-SA
+- Satellite base: Esri World Imagery (free-to-use attribution)
+- Voyager base: CARTO (free-to-use attribution)
 - This project is not affiliated with CASA, NPWS, DCCEEW, or OurAirports.
   It's a personal hobby project. Verify everything.
 

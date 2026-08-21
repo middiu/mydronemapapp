@@ -1,10 +1,10 @@
 // MyDroneMap service worker
 // - Precaches app shell + /db/* on install (so the app loads offline).
 // - Same-origin GETs: cache-first (network fallback for updates).
-// - OSM raster tiles: stale-while-revalidate with an LRU cap.
+// - Raster base tiles (OSM + Topo + Esri + CARTO): stale-while-revalidate with an LRU cap.
 // - Bumping CACHE_VERSION forces the old caches to be purged on activate.
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const SHELL_CACHE = `shell-${CACHE_VERSION}`;
 const TILE_CACHE = `tiles-${CACHE_VERSION}`;
 
@@ -20,7 +20,25 @@ const SHELL_URLS = [
   '/db/aerodromes.csv',
 ];
 
-const TILE_CAP = 1500; // ~1500 OSM tiles ≈ 30 MB on disk
+const TILE_CAP = 1500; // ~1500 tiles ≈ 30 MB on disk across all providers
+
+// Allow-list of tile hostnames to cache. Single shared TILE_CACHE; LRU is
+// shared across providers (a heavily-used satellite base can evict street
+// tiles). Acceptable trade-off vs per-provider complexity.
+const TILE_HOSTS = [
+  'tile.openstreetmap.org',
+  'tile.opentopomap.org',
+  'server.arcgisonline.com',
+  // CARTO Voyager served via legacy Fastly CDN; subdomains a-d below.
+  'cartodb-basemaps-a.global.ssl.fastly.net',
+  'cartodb-basemaps-b.global.ssl.fastly.net',
+  'cartodb-basemaps-c.global.ssl.fastly.net',
+  'cartodb-basemaps-d.global.ssl.fastly.net',
+];
+
+const matchesTileHost = (hostname) =>
+  TILE_HOSTS.includes(hostname) ||
+  TILE_HOSTS.some((h) => hostname.endsWith('.' + h));
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -91,11 +109,8 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // OSM raster tiles — stale-while-revalidate, LRU-bounded
-  if (
-    url.hostname === 'tile.openstreetmap.org' ||
-    url.hostname.endsWith('.tile.openstreetmap.org')
-  ) {
+  // Raster base tiles — stale-while-revalidate, LRU-bounded
+  if (matchesTileHost(url.hostname)) {
     event.respondWith(staleWhileRevalidate(request, TILE_CACHE, TILE_CAP));
     return;
   }

@@ -4,7 +4,20 @@ import Legend from './components/Legend.jsx';
 import Filters from './components/Filters.jsx';
 import CasaCard from './components/CasaCard.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
+import BaseMapPicker from './components/BaseMapPicker.jsx';
 import { load as loadLastPosition } from './lib/lastPosition.js';
+import { DEFAULT_BASE_MAP } from './lib/baseMaps.js';
+
+const BASEMAP_STORAGE_KEY = 'mydronemap:basemap:v1';
+
+function loadStoredBaseMap() {
+  try {
+    const v = localStorage.getItem(BASEMAP_STORAGE_KEY);
+    return v || DEFAULT_BASE_MAP;
+  } catch {
+    return DEFAULT_BASE_MAP;
+  }
+}
 
 // Parse OurAirports CSV (no quoted fields, simple comma split).
 // Returns: { ident, type, name, lat, lon, municipality, region, icao, gps }
@@ -40,8 +53,19 @@ export default function App() {
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [warningExpanded, setWarningExpanded] = useState(false);
+  // Persisted tile-provider selection (id from BASE_MAPS in lib/baseMaps.js).
+  const [baseMap, setBaseMap] = useState(loadStoredBaseMap);
   // Hydrated once at mount — drives initial map view + "last seen here" marker.
   const [lastPosition] = useState(() => loadLastPosition());
+
+  // Persist base map choice so the next launch lands on the same provider.
+  useEffect(() => {
+    try {
+      localStorage.setItem(BASEMAP_STORAGE_KEY, baseMap);
+    } catch {
+      // localStorage unavailable (private mode); selection lives for the session.
+    }
+  }, [baseMap]);
 
   // Load rules + airspace data from /db
   useEffect(() => {
@@ -149,6 +173,7 @@ export default function App() {
           <Filters filter={filter} setFilter={setFilter} />
           <CasaCard rules={rules} />
           <Legend />
+          <BaseMapPicker baseMap={baseMap} setBaseMap={setBaseMap} />
         </div>
       </aside>
       <main className="map-area">
@@ -166,6 +191,7 @@ export default function App() {
           protectedGeoJson={protectedGeoJson}
           aerodromes={aerodromes}
           lastPosition={lastPosition}
+          baseMap={baseMap}
         />
       </main>
       </div>

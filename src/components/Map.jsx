@@ -9,6 +9,7 @@ import {
   DEFAULT_MAP_CENTER,
 } from '../lib/styles.js';
 import { save as saveLastPosition } from '../lib/lastPosition.js';
+import { getBaseMapById } from '../lib/baseMaps.js';
 
 const esc = (s) => String(s).replace(/[<>&"']/g, (c) =>
   ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c]),
@@ -24,9 +25,11 @@ export default function MapView({
   protectedGeoJson,
   aerodromes,
   lastPosition,
+  baseMap,
 }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const baseLayerRef = useRef(null);
   const airportLayerRef = useRef(null);
   const protectedLayerRef = useRef(null);
   const aerodromeLayerRef = useRef(null);
@@ -56,9 +59,14 @@ export default function MapView({
       preferCanvas: true,
       zoomControl: false,
     });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-      maxZoom: 19,
+
+    // First base layer — created here so the initial render has tiles below
+    // any overlays. The swap effect below handles subsequent provider changes.
+    const initialDef = getBaseMapById(baseMap);
+    baseLayerRef.current = L.tileLayer(initialDef.url, {
+      attribution: initialDef.attribution,
+      maxZoom: initialDef.maxZoom,
+      subdomains: initialDef.subdomains || 'abc',
     }).addTo(map);
     // Zoom moved off top-left so it doesn't overlap the mobile menu FAB.
     L.control.zoom({ position: 'bottomleft' }).addTo(map);
@@ -197,6 +205,26 @@ export default function MapView({
       mapInstance.current = null;
     };
   }, []);
+
+  // Swap base tile provider when baseMap prop changes.
+// Recreation is the safe path: setUrl() on a TileLayer changes URL but the
+// attribution control keeps stale prefixes that break Leaflet's internal
+// attribution store. Removing the layer + re-adding avoids that. Overlays
+// above (airports/protected/aerodromes) are unaffected.
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!map) return;
+    if (baseLayerRef.current) {
+      map.removeLayer(baseLayerRef.current);
+    }
+    const def = getBaseMapById(baseMap);
+    const next = L.tileLayer(def.url, {
+      attribution: def.attribution,
+      maxZoom: def.maxZoom,
+      subdomains: def.subdomains || 'abc',
+    }).addTo(map);
+    baseLayerRef.current = next;
+  }, [baseMap]);
 
   // Render controlled airport exclusion zones
   useEffect(() => {
