@@ -4,7 +4,7 @@
 // - OSM raster tiles: stale-while-revalidate with an LRU cap.
 // - Bumping CACHE_VERSION forces the old caches to be purged on activate.
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const SHELL_CACHE = `shell-${CACHE_VERSION}`;
 const TILE_CACHE = `tiles-${CACHE_VERSION}`;
 
@@ -16,7 +16,6 @@ const SHELL_URLS = [
   '/icon-512.png',
   '/icon-maskable-512.png',
   '/db/rules.json',
-  '/db/nsw_lga.geojson',
   '/db/protected_areas.geojson',
   '/db/aerodromes.csv',
 ];

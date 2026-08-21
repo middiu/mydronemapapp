@@ -1,55 +1,43 @@
 # MyDroneMap
 
-Browser-based map for recreational drone flying legality across Australian
-councils, NSW state and CASA regulations. Currently scoped to
-**Greater Sydney, NSW**.
+Browser-based map of recreational drone airspace over **Greater Sydney, NSW**.
 
-The goal: pick a spot on the map and immediately see whether you can fly there,
-under which rules, and where to read the source policy.
+The goal: pick a spot on the map and immediately see what airspace
+constraints apply — CASA Part 101 baselines, NPWS state rules, controlled
+airports, protected areas, and other aerodromes — and where to read the
+source policy.
 
 > ⚠️ **Unofficial reference only.** This is a hobby project built for fun and
 > convenience. It is **not an authoritative source**. Always verify current
-> rules directly with CASA, NPWS, your local council, and the relevant land
-> manager before flying. Data may be outdated, incomplete, or wrong. By using
-> this site you accept that the authors take **no responsibility** for any
-> decisions made based on its content.
+> rules directly with CASA, NPWS, and the relevant land manager before
+> flying. Data may be outdated, incomplete, or wrong. By using this site you
+> accept that the authors take **no responsibility** for any decisions made
+> based on its content.
 
 ---
 
 ## What it shows
 
-- Sydney-metro NSW councils colour-coded by drone status
-- Controlled airport exclusion zones (5.5 km CASA buffer) — Sydney, Bankstown,
-  Camden, Richmond
-- **Protected areas** (CAPAD terrestrial NSW — national parks, nature reserves,
-  state forests) painted as permit-required
-- **Smaller airports + helipads** (OurAirports CC0 dataset) with 4 km / 1.4 km
-  CASA Part 101 buffers
-- Status filter, layer toggles, sidebar council list with direct source links
+- **CASA Part 101 baselines** — altitude ceiling, VLOS, no-fly-over-people,
+  day-only, weight-class rules.
+- **Controlled airport exclusion zones** (5.5 km CASA buffer) — Sydney,
+  Bankstown, Camden, RAAF Richmond.
+- **Protected areas** (CAPAD terrestrial NSW — national parks, nature
+  reserves, state forests) painted as permit-required (NPWS / managing
+  authority permit).
+- **Smaller airports + helipads** (OurAirports CC0 dataset) with 4 km /
+  1.4 km CASA Part 101 buffers.
+- Layer toggles for each airspace overlay.
 
 ## Data model
 
 - `db/schema.json` — JSON Schema describing the structure of `db/rules.json`.
-- `db/rules.json` — every rule we track. Edit this to add councils, change
-  status, update dates.
-- `db/nsw_lga.geojson` — official NSW LGA boundaries (slimmed to Sydney metro).
+- `db/rules.json` — CASA baseline rules, NSW state (NPWS permit) policy,
+  and the list of controlled airports.
 - `db/protected_areas.geojson` — DCCEEW CAPAD 2024 terrestrial NSW
   (Douglas-Peucker simplified to ~2.7 MB).
-- `db/aerodromes.csv` — OurAirports AU aerodromes + heliports, deduped against
-  the 4 controlled airports.
-
-Each council entry links to the GeoJSON feature via `matches_dataset_name` (an
-array of strings, because the dataset uses canonical names like
-*"Council of the City of Sydney"* while we display *"City of Sydney"*).
-
-### Status values
-
-| status       | meaning |
-|--------------|---------|
-| `open`       | No council-specific restrictions beyond CASA baseline. |
-| `permit`     | Council approval required before flying on council-managed land. |
-| `ban`        | Prohibited on council-managed land (e.g. Willoughby parks under LGA Act 1993 §632). |
-| `unknown`    | No public policy found; treat as CASA-only and flag for re-verification. |
+- `db/aerodromes.csv` — OurAirports AU aerodromes + heliports, deduped
+  against the 4 controlled airports.
 
 ### Overlays
 
@@ -67,8 +55,8 @@ npm install
 npm run dev          # open http://localhost:5173
 ```
 
-The Vite dev server serves `db/` as static files at `/db/*`, so the React app
-loads `/db/rules.json`, `/db/nsw_lga.geojson`, `/db/protected_areas.geojson` and
+The Vite dev server serves `db/` as static files at `/db/*`, so the React
+app loads `/db/rules.json`, `/db/protected_areas.geojson` and
 `/db/aerodromes.csv` directly.
 
 ## Validate the rules DB
@@ -77,28 +65,25 @@ loads `/db/rules.json`, `/db/nsw_lga.geojson`, `/db/protected_areas.geojson` and
 npm run validate:rules
 ```
 
-Cross-checks `db/rules.json` against the JSON Schema and verifies that every
-council's `matches_dataset_name` actually appears in the GeoJSON dataset.
+Cross-checks `db/rules.json` against the JSON Schema and verifies that
+every controlled airport entry has name / lat / lon / exclusion_km.
 
 ## Updating the data
 
 1. Edit `db/rules.json`:
    - Update `metadata.last_updated` and bump `metadata.version`.
-   - Add or update an entry under `councils.<slug>`.
-   - Set `matches_dataset_name` to the exact string in `nsw_lga.geojson`.
-   - Link sources (URL + title) — every rule needs a citable source.
-2. To bring in a new council, either:
-   - re-fetch the NSW dataset and re-extract (see below), or
-   - hand-author a small GeoJSON Feature in `db/nsw_lga.geojson`.
-3. Run `npm run validate:rules`.
-4. Reload the app — Vite hot-reloads JSON.
-
-### Re-extracting the NSW LGA GeoJSON
-
-```bash
-curl -L "https://data.gov.au/geoserver/nsw-local-government-areas/wfs?request=getfeature&service=wfs&version=2.0.0&typeNames=nsw-local-government-areas:ckan_f6a00643_1842_48cd_9c2f_df23a3a1dc1e&outputFormat=json&srsName=EPSG:4326" -o /tmp/nsw_lga_full.geojson
-python3 scripts/extract_sydney_lgas.py
-```
+   - Update `casa_baseline.rules[]` or `casa_baseline.weight_rules` when
+     CASA guidance changes.
+   - Update `nsw_state` when NPWS publishes a new parks drone policy.
+   - Update `controlled_airports[]` to add/remove a controlled aerodrome.
+   - Link sources (URL + title) — every controlled airport needs a
+     citable CASA rule reference.
+2. To refresh protected areas: re-download DCCEEW CAPAD and replace
+   `db/protected_areas.geojson`.
+3. To refresh smaller airports/heliports: re-download OurAirports AU and
+   regenerate `db/aerodromes.csv`.
+4. Run `npm run validate:rules`.
+5. Reload the app — Vite hot-reloads JSON.
 
 ## Deploy
 
@@ -138,7 +123,7 @@ cache, automatic SPA fallback.
    ├── index.html
    ├── _headers           # cache rules for /db/* and /assets/*
    ├── assets/            # hashed JS + CSS (immutable, 1y cache)
-   └── db/                # rules.json, schema.json, nsw_lga.geojson,
+   └── db/                # rules.json, schema.json,
                           # protected_areas.geojson, aerodromes.csv,
                           # aerodromes.json
    ```
@@ -177,11 +162,9 @@ Cloudflare Pages → **Custom domains** → add your domain. Free SSL auto-provi
 
 ## Roadmap
 
-- More councils progressively (start with Willoughby + adjacent, expand outward).
 - Live CASA airspace (OpenSky / Altitude Angel) as an optional toggle.
 - Filter by drone weight (micro ≤250g has different rules within 5.5 km of airports).
-- Suburban-level rules (some councils treat different parks differently).
-- Feedback form for users to report council rules they couldn't find.
+- Expand basemap beyond Greater Sydney.
 
 ## Source URLs
 
@@ -189,19 +172,17 @@ Cloudflare Pages → **Custom domains** → add your domain. Free SSL auto-provi
 - [CASA Drone Safety Apps](https://www.casa.gov.au/knowyourdrone/drone-safety-apps)
 - [NSW Drones in Parks Policy](https://www.environment.nsw.gov.au/topics/parks-reserves-and-protected-areas/park-policies/drones-in-parks)
 - [Local Drone Rule Map (Department of Infrastructure)](https://spatial.infrastructure.gov.au/portal/apps/experiencebuilder/experience/?id=5e871e08e09849308677bf4b9f45ccd9)
-- [NSW LGA Boundaries — data.gov.au](https://data.gov.au/data/dataset/nsw-local-government-areas)
 - [DCCEEW CAPAD 2024 (terrestrial protected areas)](https://gis.environment.gov.au/gispubmap/rest/services/ogc_services/CAPAD/MapServer/0)
 - [OurAirports (David Megginson, CC0)](https://davidmegginson.github.io/ourairports-data/)
 
 ## Attribution
 
-- Council polygons: NSW Government (data.gov.au), open licence
 - Protected areas: Department of Climate Change, Energy, the Environment and
   Water (DCCEEW) — CAPAD 2024, CC-BY 4.0
 - Aerodromes + heliports: OurAirports (David Megginson), CC0 1.0
 - Base map: OpenStreetMap contributors, ODbL
-- This project is not affiliated with CASA, NPWS, DCCEEW, OurAirports, or any
-  council. It's a personal hobby project. Verify everything.
+- This project is not affiliated with CASA, NPWS, DCCEEW, or OurAirports.
+  It's a personal hobby project. Verify everything.
 
 ## Licence
 
@@ -213,8 +194,8 @@ Application code: MIT. Data files retain their original licences (see
 ## PWA / offline mode
 
 MyDroneMap is a Progressive Web App. Install it on your phone and the whole
-app — council polygons, protected areas, aerodromes, your last known
-position, and the OSM base map tiles around where you've been — works
+app — CASA rules, NPWS state policy, protected areas, aerodromes, your last
+known position, and the OSM base map tiles around where you've been — works
 offline. Built for the case where you're standing in a paddock with no
 signal, deciding whether to fly.
 
@@ -233,7 +214,7 @@ signal, deciding whether to fly.
 ### What works offline
 
 - App shell (HTML, JS, CSS) — full UI.
-- All map data (`rules.json`, NSW LGA polygons, protected areas, aerodromes).
+- All map data (`rules.json`, protected areas, aerodromes).
 - OpenStreetMap base tiles you have already panned over while online.
 - A faded "last seen here" pin for your last geolocation fix, so the map
   has a visual anchor even when geolocation is denied while offline.
@@ -242,8 +223,8 @@ signal, deciding whether to fly.
 
 - OSM tiles you have never loaded online will show as grey squares (this
   is the OSM tile-serving policy and also just keeps the cache small).
-- Links to external council / CASA / NPWS pages will not open without a
-  signal — they open in the browser, not the SW.
+- Links to external CASA / NPWS pages will not open without a signal —
+  they open in the browser, not the SW.
 
 ### How state is persisted
 
@@ -277,7 +258,6 @@ dist/
 ├── icon-maskable-512.png
 ├── _headers                  # cache rules + SW-Allowed header
 ├── assets/                   # hashed JS + CSS (immutable, 1y cache)
-└── db/                       # rules.json, schema.json, nsw_lga.geojson,
+└── db/                       # rules.json, schema.json,
                              # protected_areas.geojson, aerodromes.csv
 ```
-

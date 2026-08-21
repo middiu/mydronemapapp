@@ -172,10 +172,7 @@ html, body, #root {
   margin-bottom: 8px;
 }
 
-.status-badge.open { background: var(--open); color: #000; }
-.status-badge.permit { background: var(--permit); color: #000; }
 .status-badge.ban { background: var(--ban); color: #fff; }
-.status-badge.unknown { background: var(--unknown); color: #fff; }
 
 .popup-summary {
   margin-bottom: 8px;
@@ -218,52 +215,6 @@ html, body, #root {
 
 .popup-link:hover {
   text-decoration: underline;
-}
-
-.popup-ctas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 10px 0 4px;
-}
-
-.popup-cta {
-  display: inline-block;
-  padding: 7px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  text-decoration: none;
-  letter-spacing: 0.01em;
-  border: 1px solid transparent;
-  transition: filter 0.15s ease;
-}
-
-.popup-cta:hover {
-  filter: brightness(1.15);
-  text-decoration: none;
-}
-
-.popup-cta.cta-permit {
-  background: var(--permit);
-  color: #1a1300;
-}
-
-.popup-cta.cta-ban {
-  background: var(--ban);
-  color: #2a0a0a;
-}
-
-.popup-cta.cta-open,
-.popup-cta.cta-unknown {
-  background: var(--accent);
-  color: #00221a;
-}
-
-.popup-cta.cta-secondary {
-  background: transparent;
-  border-color: var(--border);
-  color: var(--text);
 }
 
 .popup-warning {
@@ -376,57 +327,6 @@ html, body, #root {
   font-size: 12px;
   margin-top: 8px;
   border-radius: 4px;
-}
-
-/* Stats */
-.stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.stat-box {
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  padding: 8px 10px;
-  border-radius: 4px;
-  font-size: 11px;
-  color: var(--text-dim);
-}
-
-.stat-box .num {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text);
-  display: block;
-}
-
-/* Council list */
-.council-list {
-  margin-top: 8px;
-}
-
-.council-list-item {
-  padding: 8px 10px;
-  border-radius: 4px;
-  margin-bottom: 4px;
-  background: var(--panel-2);
-  cursor: pointer;
-  border: 1px solid var(--border);
-  font-size: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background 0.15s;
-}
-
-.council-list-item:hover {
-  background: #2a323c;
-}
-
-.council-list-item .name {
-  font-weight: 500;
 }
 
 /* ── Mobile / collapsible UI ──────────────────────────────────────────── */
@@ -589,9 +489,6 @@ html, body, #root {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
-  /* Larger tap targets on council list items. */
-  .council-list-item { padding: 11px 12px; }
 
   /* Popups: keep them clear of the top safe area. */
   .leaflet-popup-content-wrapper {

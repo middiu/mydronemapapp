@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "MyDroneMap Rules Database Schema",
-  "description": "Schema for the local drone flying rules database. Each council record is keyed by a slug. Status values are: open, permit, ban, unknown. Sources array must contain official URLs where the rule was sourced from.",
+  "description": "Schema for the local drone airspace database. CASA baseline, NSW state (NPWS permit policy), and controlled airports (5.5km CASA exclusion). Each controlled airport entry must include name, lat, lon, exclusion_km, and rule text.",
   "type": "object",
-  "required": ["metadata", "casa_baseline", "councils"],
+  "required": ["metadata", "casa_baseline"],
   "properties": {
     "metadata": {
       "type": "object",
@@ -36,10 +36,6 @@
         "policy_date": { "type": "string" }
       }
     },
-    "councils": {
-      "type": "object",
-      "additionalProperties": { "$ref": "#/definitions/council" }
-    },
     "controlled_airports": {
       "type": "array",
       "items": {
@@ -53,48 +49,6 @@
           "exclusion_km": { "type": "number" },
           "rule": { "type": "string" }
         }
-      }
-    }
-  },
-  "definitions": {
-    "council": {
-      "type": "object",
-      "required": ["display_name", "status", "summary", "sources", "last_updated"],
-      "properties": {
-        "display_name": { "type": "string" },
-        "lga_pid": { "type": ["string", "null"] },
-        "matches_dataset_name": {
-          "oneOf": [
-            { "type": "string" },
-            { "type": "array", "items": { "type": "string" } }
-          ]
-        },
-        "status": {
-          "type": "string",
-          "enum": ["open", "permit", "ban", "unknown"]
-        },
-        "summary": { "type": "string" },
-        "prohibited_areas": { "type": "array", "items": { "type": "string" } },
-        "permitted_areas": { "type": "array", "items": { "type": "string" } },
-        "notes": { "type": "array", "items": { "type": "string" } },
-        "permit_url": { "type": "string", "format": "uri" },
-        "permit_label": { "type": "string" },
-        "policy_url": { "type": "string", "format": "uri" },
-        "policy_label": { "type": "string" },
-        "sources": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["url", "title"],
-            "properties": {
-              "url": { "type": "string", "format": "uri" },
-              "title": { "type": "string" },
-              "type": { "type": "string", "enum": ["official", "news", "third-party"] }
-            }
-          }
-        },
-        "last_updated": { "type": "string", "format": "date" },
-        "needs_verification": { "type": "boolean" }
       }
     }
   }

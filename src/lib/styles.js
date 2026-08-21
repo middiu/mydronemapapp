@@ -1,31 +1,4 @@
 // Shared style constants for Leaflet layers
-export const STATUS_STYLES = {
-  open: {
-    color: '#3fb950',
-    weight: 2,
-    fillColor: '#3fb950',
-    fillOpacity: 0.25,
-  },
-  permit: {
-    color: '#d29922',
-    weight: 2,
-    fillColor: '#d29922',
-    fillOpacity: 0.25,
-  },
-  ban: {
-    color: '#f85149',
-    weight: 2,
-    fillColor: '#f85149',
-    fillOpacity: 0.35,
-  },
-  unknown: {
-    color: '#6e7681',
-    weight: 1,
-    fillColor: '#6e7681',
-    fillOpacity: 0.15,
-    dashArray: '4 4',
-  },
-};
 
 export const AIRPORT_STYLE = {
   color: '#f0883e',
@@ -73,11 +46,4 @@ export const BUFFER_RADIUS_KM = {
   heliport: 1.4,
 };
 
-export const STATUS_LABELS = {
-  open: 'Open — CASA rules only',
-  permit: 'Council permit required',
-  ban: 'Prohibited',
-  unknown: 'Unknown — verify',
-};
-
-export const DEFAULT_MAP_CENTER = [-33.82, 151.1]; // Sydney north shore, will be overridden by fitBounds
+export const DEFAULT_MAP_CENTER = [-33.85, 151.1]; // Sydney CBD area; zoom 10 frames the metro basin

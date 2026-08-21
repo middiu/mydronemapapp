@@ -1,25 +1,7 @@
-import { STATUS_LABELS } from '../lib/styles.js';
-
 export default function Legend() {
-  const entries = Object.entries(STATUS_LABELS);
   return (
     <div className="legend">
       <div className="legend-title">Legend</div>
-      {entries.map(([status, label]) => (
-        <div className="legend-item" key={status}>
-          <span
-            className="legend-swatch"
-            style={{
-              background:
-                status === 'open' ? '#3fb950'
-                : status === 'permit' ? '#d29922'
-                : status === 'ban' ? '#f85149'
-                : '#6e7681',
-            }}
-          />
-          <span>{label}</span>
-        </div>
-      ))}
       <div className="legend-item">
         <span className="legend-swatch" style={{ background: 'transparent', borderColor: '#f0883e' }} />
         <span>5.5km controlled airport (CASA)</span>

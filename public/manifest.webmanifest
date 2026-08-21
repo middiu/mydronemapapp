@@ -1,7 +1,7 @@
 {
   "name": "MyDroneMap — where can I fly?",
   "short_name": "MyDroneMap",
-  "description": "Browser map for recreational drone flying legality across NSW councils, state, and CASA regulations. Works offline.",
+  "description": "Browser map for recreational drone airspace over Greater Sydney — CASA Part 101 baselines, NPWS state rules, controlled airports, protected areas, and smaller aerodromes. Works offline.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

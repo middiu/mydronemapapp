@@ -19,26 +19,22 @@ if (!ok) {
   console.error(JSON.stringify(validate.errors, null, 2));
   process.exit(1);
 }
-console.log(`✓ rules.json valid (v${data.metadata?.version}, last_updated ${data.metadata?.last_updated})`);
-console.log(`  ${Object.keys(data.councils || {}).length} councils, ${data.controlled_airports?.length || 0} airports`);
 
-// Cross-check: every council's matches_dataset_name should exist in nsw_lga.geojson
-try {
-  const geo = JSON.parse(readFileSync(join(root, 'db/nsw_lga.geojson'), 'utf8'));
-  const datasetNames = new Set(geo.features.map((f) => f.properties?.LGA_NAME).filter(Boolean));
-  let matched = 0;
-  let unmatched = [];
-  Object.entries(data.councils || {}).forEach(([key, c]) => {
-    const names = Array.isArray(c.matches_dataset_name) ? c.matches_dataset_name : [c.matches_dataset_name];
-    const hit = names.find((n) => datasetNames.has(n));
-    if (hit) matched++;
-    else unmatched.push({ key, names });
-  });
-  console.log(`✓ ${matched}/${Object.keys(data.councils).length} councils matched against GeoJSON dataset`);
-  if (unmatched.length) {
-    console.warn(`  ⚠ ${unmatched.length} council(s) without a matching polygon:`);
-    unmatched.forEach((u) => console.warn(`    - ${u.key}: tried ${JSON.stringify(u.names)}`));
-  }
-} catch (e) {
-  console.warn('Could not cross-check against nsw_lga.geojson:', e.message);
+const casaRules = data.casa_baseline?.rules || [];
+const airports = data.controlled_airports || [];
+const malformedAirports = airports.filter(
+  (a) => !a.name || !Number.isFinite(a.lat) || !Number.isFinite(a.lon) || !Number.isFinite(a.exclusion_km),
+);
+
+if (casaRules.length === 0) {
+  console.error('casa_baseline.rules is empty');
+  process.exit(1);
 }
+if (malformedAirports.length) {
+  console.error('controlled_airports has malformed entries:');
+  malformedAirports.forEach((a) => console.error(`  - ${JSON.stringify(a)}`));
+  process.exit(1);
+}
+
+console.log(`✓ rules.json valid (v${data.metadata?.version}, last_updated ${data.metadata?.last_updated})`);
+console.log(`  ${airports.length} controlled airports, ${casaRules.length} CASA rules`);
